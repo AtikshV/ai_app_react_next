@@ -1,11 +1,136 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { Inter, Noto_Color_Emoji, Shadows_Into_Light_Two } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
+import { useState, useEffect } from 'react'
+
+
+
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+// const Dictaphone = () => {
+//   const {
+//     transcript,
+//     listening,
+//     resetTranscript,
+//     browserSupportsSpeechRecognition
+//   } = useSpeechRecognition();
+
+//   if (!browserSupportsSpeechRecognition) {
+//     return <span>Browser doesn't support speech recognition.</span>;
+//   }
+
+//   return (
+//     <div>
+//       <p>Microphone: {listening ? 'on' : 'off'}</p>
+//       <button onClick={SpeechRecognition.startListening}>Start</button>
+//       <button onClick={SpeechRecognition.stopListening}>Stop</button>
+//       <button onClick={resetTranscript}>Reset</button>
+//       <p>{transcript}</p>
+//     </div>
+//   );
+  
+// };
+
 
 const inter = Inter({ subsets: ['latin'] })
 
+
+
 export default function Home() {
+
+  const [isPaused, setIsPaused] = useState(false);
+  // const [utterance, setUtterance] = useState(null);
+  const [message, setMessage] = useState(""); 
+  const [text, setText] = useState(""); 
+
+
+
+  const commands = [
+    {
+      command: "over",
+      callback: (dependency) => handlePlay()
+    }
+  ]
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition({ commands });
+
+  const listenStart = () => {
+    SpeechRecognition.startListening({continuous:true});
+  }
+
+  // text to speach code begin
+
+
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    const u = new SpeechSynthesisUtterance(text);
+    console.log("UseEffect Log: " + text);
+
+    // setUtterance(u);
+
+    u.addEventListener("end", (event) => {
+      console.log("utterance has ended?");
+      resetTranscript(); 
+  
+    }) 
+
+    synth.speak(u); 
+
+    return () => {
+      synth.cancel();
+    };
+  }, [text]);
+
+  const handlePlay = async () => {
+
+    console.log(transcript);
+
+    var requestBody = "data="+transcript //TODO: url encode transcript
+
+    const response = await fetch("http://localhost:8000/GPT_output", {
+      method: "POST",
+      body: requestBody,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    })
+
+    var data = await response.text()
+
+    // text = data;
+    setText(data); 
+    // console.log(text);
+    // console.log(response.text);
+    // console.log(response);
+    setMessage(data); 
+
+
+
+    // const synth = window.speechSynthesis;
+    // console.log(utterance);
+    // synth.speak(utterance);
+
+  };
+
+
+  const handlePause = () => {
+    const synth = window.speechSynthesis;
+    synth.pause();
+    setIsPaused(true);
+  };
+
+  const handleStop = () => {
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    setIsPaused(false);
+  };
+// text to speach code end
+
   return (
     <>
       <Head>
@@ -16,27 +141,13 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.js</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
+          <p>Microphone: {listening ? 'on' : 'off'}</p>
+          <button onClick={listenStart}>Start</button>
+          <button onClick={SpeechRecognition.stopListening}>Stop</button>
+          <button onClick={resetTranscript}>Reset</button>
+          <button onClick={handlePlay}>Play Speech</button> 
+          <p>{message}</p>
+          <p>{transcript}</p>
         </div>
 
         <div className={styles.center}>
@@ -50,64 +161,6 @@ export default function Home() {
           />
         </div>
 
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
       </main>
     </>
   )
