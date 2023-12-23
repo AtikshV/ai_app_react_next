@@ -92,7 +92,7 @@ export default function Home() {
 
     var requestBody = "data="+transcript //TODO: url encode transcript
 
-    const response = await fetch("http://localhost:8000/GPT_output", {
+    const response = await fetch("https://flask-hello-world-ruby-three.vercel.app/GPT_output", {
       method: "POST",
       body: requestBody,
       headers: {
