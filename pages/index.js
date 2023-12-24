@@ -2,11 +2,32 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter, Noto_Color_Emoji, Shadows_Into_Light_Two } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, startTransition } from 'react'
+import ReactDOM from "react-dom"
+
 
 
 
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import Modal from "react-modal"
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "#454545",
+    width: 400,
+  },
+
+  overlay: {
+    background: "#1C1C1C"
+  },
+};
+
+
 // const Dictaphone = () => {
 //   const {
 //     transcript,
@@ -33,15 +54,19 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 
 
 const inter = Inter({ subsets: ['latin'] })
+const local = "http://localhost:3000/"
+const vercel = "https://flask-hello-world-ruby-three.vercel.app/GPT_output"
 
 
-
-export default function Home() {
+export default function App() {
 
   const [isPaused, setIsPaused] = useState(false);
   // const [utterance, setUtterance] = useState(null);
   const [message, setMessage] = useState(""); 
   const [text, setText] = useState(""); 
+  const [modalOpen, setModalOpen] = useState(false);
+  // console.log(modalOpen);
+
 
 
 
@@ -60,7 +85,21 @@ export default function Home() {
   } = useSpeechRecognition({ commands });
 
   const listenStart = () => {
-    SpeechRecognition.startListening({continuous:true});
+    if((localStorage.getItem("pass") == null )|| (localStorage.getItem("pass") == "")) {
+      setModalOpen(true)
+
+    } else {
+      console.log("current password:" + localStorage.getItem("pass")+":");
+      SpeechRecognition.startListening({continuous:true});
+
+    }
+  }
+
+  const savePass = () => {
+    localStorage.setItem("pass", document.getElementById("password").value)
+    localStorage.setItem("name", document.getElementById("name").value)
+    setModalOpen(false)
+
   }
 
   // text to speach code begin
@@ -90,9 +129,9 @@ export default function Home() {
 
     console.log(transcript);
 
-    var requestBody = "data="+transcript //TODO: url encode transcript
-
-    const response = await fetch("https://flask-hello-world-ruby-three.vercel.app/GPT_output", {
+    var requestBody = "data="+transcript+ "&pass=" + localStorage.getItem("pass") + "&name=" + localStorage.getItem("name"); //TODO: url encode transcript
+    console.log(requestBody)
+    const response = await fetch(vercel, {
       method: "POST",
       body: requestBody,
       headers: {
@@ -141,27 +180,57 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <div className={styles.description}>
-          <p>Microphone: {listening ? 'on' : 'off'}</p>
-          <button onClick={listenStart}>Start</button>
-          <button onClick={SpeechRecognition.stopListening}>Stop</button>
+        <p>Microphone: {listening ? 'on' : 'off'}</p>
+          {/* 
+          <button onClick={listenStart} ><img src='/accept.png' width={40}></img></button>
+          <button onClick={SpeechRecognition.stopListening}><img src='/decline.png' width={40}></img></button>
           <button onClick={resetTranscript}>Reset</button>
           <button onClick={handlePlay}>Play Speech</button> 
           <p>{message}</p>
-          <p>{transcript}</p>
+          <p>{transcript}</p> */}
         </div>
 
         <div className={styles.center}>
           <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
+            src="/andy.png"
             width={180}
-            height={37}
+            height={180}
+            alt='Andy'
             priority
           />
+        </div>
+        <p className={styles.smallFont}>{transcript}</p>
+        <p className={styles.smallFont}>{message}</p> 
+        <div className={styles.description}>
+          
+          <button onClick={listenStart} ><img src='/accept.png' width={60}></img></button>
+          <button onClick={SpeechRecognition.stopListening}><img src='/decline.png' width={60}></img></button>
+          <button onClick={() => setModalOpen(true)}>Open Modal</button>
+          <Modal isOpen={modalOpen}
+            // onRequestClose={() => setModalOpen(false)}
+            ariaHideApp={false}
+            center
+            style={customStyles}
+          > 
+          <div>    
+              <form>
+                <label>Name: </label> <br></br>
+                <input type='text' id='name' name='name'></input> <br></br>
+                <label>Password: </label> <br></br>
+                <input type='password' id='password' name='password'></input> <br></br> <br></br>
+              </form>
+            </div>
+            
+            <button onClick={() => savePass()}>Submit</button>
+
+          </Modal>
         </div>
 
       </main>
     </>
   )
 }
+// ReactDOM.render(<App />, document.getElementById('app'));
+{/* <a href="https://www.flaticon.com/free-icons/phone" title="phone icons">Phone icons created by iconmas - Flaticon</a> */}
+{/* <a href="https://www.flaticon.com/free-icons/hang-up" title="hang up icons">Hang up icons created by juicy_fish - Flaticon</a> */}
+

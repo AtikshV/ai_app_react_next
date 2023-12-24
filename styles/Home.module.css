@@ -39,6 +39,11 @@
   font-family: var(--font-mono);
 }
 
+.smallFont {
+  font-size: small;
+  font-weight: lighter;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(25%, auto));
@@ -227,3 +232,5 @@
     transform: rotate(0deg);
   }
 }
+
+/* --------------MODAL CSS BELOW HERE---------------------------------- */
