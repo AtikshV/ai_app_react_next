@@ -9,13 +9,13 @@
 
 .description {
   display: inherit;
-  justify-content: inherit;
+  justify-content: center;
   align-items: inherit;
-  font-size: 0.85rem;
+  font-size: 1.5rem;
   max-width: var(--max-width);
   width: 100%;
   z-index: 2;
-  font-family: var(--font-mono);
+  /*font-family: var(--font-mono);*/
 }
 
 .description a {
@@ -42,6 +42,29 @@
 .smallFont {
   font-size: small;
   font-weight: lighter;
+}
+
+.img {
+  border-radius: 50%;
+  height: auto;
+  width: auto;
+}
+
+.modalBackgroud {
+  background-color: #454545;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  row-gap: 1rem;
+}
+
+.modalForm p{
+  row-gap: 4.5rem;
 }
 
 .grid {
@@ -161,7 +184,7 @@
   }
 
   .description {
-    font-size: 0.8rem;
+    font-size: 1.5rem;
   }
 
   .description a {
