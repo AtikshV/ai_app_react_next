@@ -7,8 +7,7 @@ import ReactDOM from "react-dom"
 
 
 
-
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import RSpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import Modal from "react-modal"
 const customStyles = {
   content: {
@@ -67,7 +66,9 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [loggedIn, setloggedIn] = useState(false)
 
-  //speech recognition code start
+
+  // speech recognition code start
+
   const commands = [
     {
       command: "over",
@@ -88,10 +89,10 @@ export default function App() {
       setModalOpen(true)
     } else {
       console.log("current password:" + localStorage.getItem("pass")+":");
-      SpeechRecognition.startListening({continuous:true});
+      setText("Hey, Andy here! Remember to pause and say over!")
+      setMessage("Hey, Andy here! Remember to pause and say over!"); 
+      RSpeechRecognition.startListening({continuous:true});
     }
-    
-
   }
   // speech recognition code end
 
@@ -159,12 +160,18 @@ export default function App() {
 
 
   useEffect(() => {
-    //* useEffect only called once on render
+    //* useEffect only called on render
     if((localStorage.getItem("pass") == null )|| (localStorage.getItem("pass") == "")) {
       setloggedIn (false);
     } else {
       setloggedIn (true);
     }
+    // const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // const recognition = new SpeechRecognition()
+    // recognition.addEventListener ("audiostart ", (event) => {
+    //   console.log("sound has stopped")
+    // });
+
   }, []);
 
 
@@ -173,8 +180,11 @@ export default function App() {
     localStorage.setItem("name", document.getElementById("name").value);
     setloggedIn(true);
     setModalOpen(false);
+    setText(`Hey ${localStorage.getItem("name")}, Andy here! After you finish speaking, pause and say over. I'm still in beta, so please be patient with me.`)
+    setMessage(`Hey ${localStorage.getItem("name")}, Andy here! After you finish speaking, pause and say over. I'm still in beta, so please be patient with me.`)
+
     //listenStart();
-    SpeechRecognition.startListening({continuous:false});
+    RSpeechRecognition.startListening({continuous:true});
 
   }
 
@@ -192,7 +202,8 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={`${styles.main} ${inter.className}`}>
+      {/*<main className={`${styles.main} ${inter.className}`}>*/}
+      <main className={`${styles.main}`}>
         <div className={styles.description}>
           <button>{listening ? <img src='/micOn.png' width={30}/> : <img src='/micOff.png' width={30}/>}</button>
           { loggedIn ? "Welcome " : ''}
@@ -216,7 +227,7 @@ export default function App() {
         
         <div className={styles.description}>
   
-          { listening ? <button onClick={SpeechRecognition.stopListening}><img src='/decline.png' width={60}></img></button> : <button onClick={listenStart} ><img src='/accept.png' width={60}></img></button>  }
+          { listening ? <button onClick={RSpeechRecognition.stopListening}><img src='/decline.png' width={60}></img></button> : <button onClick={listenStart} ><img src='/accept.png' width={60}></img></button>  }
 
         </div>
         
